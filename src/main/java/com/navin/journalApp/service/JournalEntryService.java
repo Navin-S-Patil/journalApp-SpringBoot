@@ -1,6 +1,7 @@
 package com.navin.journalApp.service;
 
 import com.navin.journalApp.entity.JournalEntry;
+import com.navin.journalApp.entity.User;
 import com.navin.journalApp.repository.JournalEntryRepository;
 import org.bson.types.ObjectId;
 
@@ -16,9 +17,16 @@ public class JournalEntryService {
     @Autowired
     private JournalEntryRepository journalEntryRepository;
 
+    @Autowired
+    private UserService userService;
 
-    public void saveEntry(JournalEntry journalEntry) {
-        journalEntryRepository.save(journalEntry);
+
+    public void saveEntry(JournalEntry journalEntry, String username) {
+        User user = userService.getUserName(username);
+        JournalEntry save = journalEntryRepository.save(journalEntry);
+        user.getJournalEntries().add(save);
+        userService.saveEntry(user);
+
     }
 
     public List<JournalEntry> getAllEntry() {

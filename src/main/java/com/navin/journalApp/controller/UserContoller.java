@@ -26,6 +26,11 @@ public class UserContoller {
         return  userService.getAllEntry();
     }
 
+    @GetMapping("/hello")
+    public void hello(){
+
+    }
+
     @PostMapping
     public void createUser(@RequestBody User user){
         userService.saveEntry(user);
