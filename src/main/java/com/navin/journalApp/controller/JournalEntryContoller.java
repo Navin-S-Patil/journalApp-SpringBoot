@@ -26,21 +26,20 @@ public class JournalEntryContoller {
     public ResponseEntity<?> getAll(@PathVariable String username) {
         User user = userService.getUserName(username);
         List<JournalEntry> allEntry = user.getJournalEntries();
-        if(allEntry != null && !allEntry.isEmpty()){
-            return new ResponseEntity<>(allEntry,HttpStatus.OK);
+        if (allEntry != null && !allEntry.isEmpty()) {
+            return new ResponseEntity<>(allEntry, HttpStatus.OK);
         }
-        return new ResponseEntity<>("No Entry Found",HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>("No Entry Found", HttpStatus.NOT_FOUND);
     }
 
     @GetMapping("/id/{myId}")
-    public ResponseEntity<JournalEntry> getJournalEntryById(@PathVariable ObjectId myId){
+    public ResponseEntity<JournalEntry> getJournalEntryById(@PathVariable ObjectId myId) {
         Optional<JournalEntry> entryById = journalEntryService.getEntryById(myId);
 
-        if (entryById.isPresent()){
+        if (entryById.isPresent()) {
             return new ResponseEntity<>(entryById.get(), HttpStatus.OK);
         }
         return new ResponseEntity<>(HttpStatus.OK);
-
     }
 
 
@@ -48,28 +47,29 @@ public class JournalEntryContoller {
     public ResponseEntity<?> createEntry(@RequestBody JournalEntry entry, @PathVariable String username) {
         try {
             entry.setDate(LocalDateTime.now());
-            journalEntryService.saveEntry(entry,username);
-            return new ResponseEntity<>(entry,HttpStatus.OK);
-        }catch (Exception e){
+            journalEntryService.saveEntry(entry, username);
+            return new ResponseEntity<>(entry, HttpStatus.OK);
+        } catch (Exception e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
 
-    @DeleteMapping("/id/{myId}")
-    public ResponseEntity<?> deleteEntry(@PathVariable ObjectId myId) {
-        journalEntryService.deleteEntryById(myId);
+    @DeleteMapping("/id/{username}/{myId}")
+    public ResponseEntity<?> deleteEntry(@PathVariable ObjectId myId, @PathVariable String username) {
+        journalEntryService.deleteEntryById(myId, username);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    @PutMapping("/id/{myId}")
-    public ResponseEntity<?> updateEntry(@PathVariable ObjectId myId, @RequestBody JournalEntry entry) {
+    @PutMapping("/id/{username}/{myId}")
+    public ResponseEntity<?> updateEntry(@PathVariable ObjectId myId, @PathVariable String username, @RequestBody JournalEntry entry) {
+
         JournalEntry old = journalEntryService.getEntryById(myId).orElse(null);
-//        if (old != null) {
-//            old.setContent(entry.getContent() != null && !entry.getContent().equals("") ? entry.getContent() : old.getContent());
-//            old.setTitle(entry.getTitle() != null && !entry.getTitle().equals("") ? entry.getTitle() : old.getTitle());
-//            journalEntryService.saveEntry(old, user);
-//            return new ResponseEntity<>(old, HttpStatus.OK);
-//        }
+        if (old != null) {
+            old.setContent(entry.getContent() != null && !entry.getContent().equals("") ? entry.getContent() : old.getContent());
+            old.setTitle(entry.getTitle() != null && !entry.getTitle().equals("") ? entry.getTitle() : old.getTitle());
+            journalEntryService.saveEntry(old);
+            return new ResponseEntity<>(old, HttpStatus.OK);
+        }
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
