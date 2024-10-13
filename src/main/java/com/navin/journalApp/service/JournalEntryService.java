@@ -5,6 +5,8 @@ import com.navin.journalApp.entity.User;
 import com.navin.journalApp.repository.JournalEntryRepository;
 import org.bson.types.ObjectId;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,10 +26,10 @@ public class JournalEntryService {
 
     @Transactional
     public void saveEntry(JournalEntry journalEntry, String username) {
-        User user = userService.getUserName(username);
+        User user = userService.findByUsername(username);
         JournalEntry save = journalEntryRepository.save(journalEntry);
         user.getJournalEntries().add(save);
-        userService.saveEntry(user);
+        userService.saveUser(user);
     }
 
     public void saveEntry(JournalEntry journalEntry) {
@@ -44,10 +46,21 @@ public class JournalEntryService {
         return journalEntryRepository.findById(id);
     }
 
-    public void deleteEntryById(ObjectId id, String username) {
-        User user = userService.getUserName(username);
-        user.getJournalEntries().removeIf(x -> x.getId().equals(id));
-        userService.saveEntry(user);
-        journalEntryRepository.deleteById(id);
+    @Transactional
+    public boolean deleteEntryById(ObjectId id, String username) {
+        boolean removedIf = false;
+        try {
+
+            User user = userService.findByUsername(username);
+            removedIf = user.getJournalEntries().removeIf(x -> x.getId().equals(id));
+            if (removedIf) {
+                userService.saveUser(user);
+                journalEntryRepository.deleteById(id);
+            }
+        }catch (Exception e){
+
+            System.out.println(e.getMessage());
+        }
+        return removedIf;
     }
 }

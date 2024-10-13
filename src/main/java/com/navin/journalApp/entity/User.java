@@ -1,6 +1,7 @@
 package com.navin.journalApp.entity;
 
 
+import com.mongodb.connection.ProxySettings;
 import lombok.Data;
 import lombok.NonNull;
 import org.bson.types.ObjectId;
@@ -22,10 +23,18 @@ public class User {
     @Indexed(unique = true)
     @NonNull
     private String username;
+
+    private String email;
+
+    private boolean sentimentAnalysis;
+
     @NonNull
     private String password;
     @DBRef
     private List<JournalEntry> journalEntries = new ArrayList<>();
     private List<String> roles;
 
+    public static ProxySettings.Builder builder() {
+        return null;
+    }
 }
